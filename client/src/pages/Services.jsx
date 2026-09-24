@@ -1,0 +1,5 @@
+import React,{useEffect,useState} from 'react';
+import Seo from '../components/Seo';
+import ServiceCards from '../components/ServiceCards';
+import {api} from '../api';
+export default function Services(){const [items,setItems]=useState([]);useEffect(()=>{api.services().then(setItems).catch(()=>{})},[]);return <><Seo title="Construction Consultancy Services | Darwich Consultancy" description="Architectural design, structural engineering, cost estimation, BOQ, project management, construction supervision and fit-out consultancy in Bangladesh." canonical="https://darwichconsultancy.com/services"/><section className="page-hero"><div className="container narrow"><p className="eyebrow">What we do</p><h1>Consultancy built around real project decisions.</h1><p className="lead">Choose the support you need at concept, design, tender or construction stage. Scope and fees can be tailored to the project.</p></div></section><section className="section"><div className="container"><ServiceCards services={items}/></div></section></>}

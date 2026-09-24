@@ -1,0 +1,5 @@
+import React,{useState} from 'react';
+import { useNavigate } from 'react-router-dom';
+import Seo from '../components/Seo';
+import { api } from '../api';
+export default function AdminLogin(){const nav=useNavigate();const [email,setEmail]=useState('');const [password,setPassword]=useState('');const [err,setErr]=useState('');const submit=async e=>{e.preventDefault();try{const r=await api.login(email,password);localStorage.setItem('darwich_token',r.token);nav('/admin');}catch(x){setErr(x.message)}};return <div className="admin-auth"><Seo title="DARWICH Admin Login" description="" canonical="https://darwichconsultancy.com/admin/login" noindex/><form onSubmit={submit}><img src="/brand/darwich-logo.png" alt="DARWICH"/><h1>Admin login</h1><label>Email<input type="email" required value={email} onChange={e=>setEmail(e.target.value)}/></label><label>Password<input type="password" required value={password} onChange={e=>setPassword(e.target.value)}/></label><button className="btn primary full">Log in</button>{err&&<p className="error">{err}</p>}</form></div>}

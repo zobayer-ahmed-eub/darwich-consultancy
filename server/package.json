@@ -1,0 +1,23 @@
+{
+  "name": "darwich-server",
+  "version": "1.0.0",
+  "private": true,
+  "main": "server.js",
+  "scripts": {
+    "dev": "nodemon server.js",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "bcryptjs": "latest",
+    "cors": "latest",
+    "dotenv": "latest",
+    "express": "^4.21.2",
+    "express-rate-limit": "latest",
+    "helmet": "latest",
+    "jsonwebtoken": "latest",
+    "mysql2": "latest"
+  },
+  "devDependencies": {
+    "nodemon": "latest"
+  }
+}

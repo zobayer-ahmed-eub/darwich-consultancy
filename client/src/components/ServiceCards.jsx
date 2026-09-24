@@ -1,0 +1,3 @@
+import React from 'react';import {Link} from 'react-router-dom';
+const icons=['⌂','▦','∑','↗','◫','✦'];
+export default function ServiceCards({services=[]}){return <div className="cards three">{services.map((s,i)=><article className="service-card" key={s.id||s.slug}>{s.image&&<img className="service-card-image" src={s.image} alt={s.title}/>}<div className="service-icon">{icons[i%icons.length]}</div><p className="eyebrow service-kicker">{s.kicker||'Consultancy'}</p><h3>{s.title}</h3><p>{s.short_description}</p>{Number(s.starting_price)>0&&<p className="service-card-price">{s.price_label||'Starting from'} ৳{Number(s.starting_price).toLocaleString('en-BD')}</p>}<Link to={`/services/${s.slug}`}>Explore service →</Link></article>)}</div>}

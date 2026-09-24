@@ -1,0 +1,9 @@
+{
+  "name": "Darwich Consultancy",
+  "short_name": "Darwich",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#f47c20",
+  "icons": [{"src":"/brand/favicon.png","sizes":"512x512","type":"image/png"}]
+}
