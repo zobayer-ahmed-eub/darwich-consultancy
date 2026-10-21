@@ -2,6 +2,7 @@ import { Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
 import Home from './pages/Home';
 import Services from './pages/Services';
+import Estimate from './pages/Estimate';
 import ServicePage from './pages/ServicePage';
 import Projects from './pages/Projects';
 import Gallery from './pages/Gallery';
@@ -20,6 +21,7 @@ export default function App(){return <Routes>
   <Route element={<Layout/>}>
     <Route path="/" element={<Home/>}/>
     <Route path="/services" element={<Services/>}/>
+    <Route path="/estimate" element={<Estimate/>}/>
     <Route path="/services/:slug" element={<ServicePage/>}/>
     <Route path="/products" element={<Products/>}/>
     <Route path="/products/:slug" element={<ProductDetail/>}/>

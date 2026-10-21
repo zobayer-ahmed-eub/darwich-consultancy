@@ -202,6 +202,27 @@ async function initDb(){
     await db.query(`INSERT IGNORE INTO services(slug,title,kicker,short_description,body,starting_price,price_label,price_unit,booking_enabled,quote_enabled,nav_visible,featured,sort_order) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)`,s);
   }
 
+  // One-time non-destructive site refresh: old services are archived, not deleted.
+  // Existing products, bookings, projects, enquiries and uploaded admin content are retained.
+  const [[migration]]=await db.query("SELECT setting_value FROM site_settings WHERE setting_key='darwich_four_services_v1'");
+  if(!migration){
+    const refreshed=[
+      ['cost-estimation-consultancy','Cost Estimation & Consultancy','Plan better · Budget clearly','Itemised project cost estimates, scope planning and practical consultancy for renovations, fit-outs and construction.','We help you define requirements, compare material options and make informed budget decisions. Available support includes quantity take-offs, BOQ preparation, estimates, material and labour costing, budget planning and indicative work schedules. Final figures depend on measured scope, site conditions and current local prices.',1],
+      ['architectural-interior-design','Architectural Interior Design','Layouts · Finishes · Practical details','Interior concepts, space planning and architectural design support for residential and commercial environments.','From concept layouts and space optimisation to coordinated finishes and materials, our architectural interior design support balances practicality, aesthetics and budget. Scope is confirmed based on project requirements and available site information.',2],
+      ['mural-painting-3d-wall-art','Mural Painting & 3D Wall Art','Schools · Cafés · Feature walls','Creative murals, cultural illustrations, commercial feature walls and 3D-inspired art for memorable spaces.','Mural work can support primary schools, cafes, public spaces and branded interiors. We discuss wall condition, design direction, artwork approval, materials and installation requirements before making a proposal.',3],
+      ['wood-interiors-decking','Wood Interiors & Decking','Resort rooms · Timber details','Warm wood interiors, wall and ceiling panelling, custom timber finishes and resort-inspired decking.','Explore timber textures, practical details, cladding, joinery and decking solutions for rooms and outdoor living spaces. The Sajek photographs shown on this website are visual references until the company verifies project attribution.',4]
+    ];
+    for(const row of refreshed){
+      await db.query(`INSERT IGNORE INTO services (slug,title,kicker,short_description,body,starting_price,booking_enabled,quote_enabled,nav_visible,featured,sort_order,active)
+        VALUES (?,?,?,?,?,0,1,1,1,1,?,1)`,row);
+    }
+    await db.query(`UPDATE services SET active=0,nav_visible=0,featured=0 WHERE slug NOT IN (?,?,?,?)`,refreshed.map(x=>x[0]));
+    // Name and role were provided by the client; photograph and credentials await confirmation.
+    const [[artist]]=await db.query('SELECT id FROM management WHERE name=? LIMIT 1',['Arifa Jahan Swarna']);
+    if(!artist) await db.query(`INSERT INTO management (name,role,bio,sort_order,active) VALUES (?,?,?,?,?)`,
+      ['Arifa Jahan Swarna','Mural Artist','Mural painting and decorative wall-art profile. Project credits, biography and an approved portrait can be added from the admin panel.',1,1]);
+    await db.query("INSERT INTO site_settings(setting_key,setting_value) VALUES ('darwich_four_services_v1','1')");
+  }
   const email=process.env.ADMIN_EMAIL;
   const password=process.env.ADMIN_PASSWORD;
   if(email && password){

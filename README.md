@@ -1,3 +1,5 @@
+> **October 2026 site update:** see [GITHUB-UPDATE-2026-10-21.md](./GITHUB-UPDATE-2026-10-21.md) for the four-service migration, redesigned homepage, cost-estimation enquiry form, images and safe GitHub/Hostinger deployment steps.
+
 # Darwich Consultancy
 
 Full-stack construction consultancy website for **darwichconsultancy.com**, designed for Hostinger deployment.
