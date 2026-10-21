@@ -1,4 +1,9 @@
-import React from 'react';import {Link} from 'react-router-dom';
-const icons=['▤','⌑','✳','▥'];
-const referenceCovers={'mural-painting-3d-wall-art':'/reference/mural-artist-at-work.webp','wood-interiors-decking':'/reference/sajek-room.webp'};
-export default function ServiceCards({services=[]}){return <div className="cards three">{services.map((s,i)=><article className="service-card" key={s.id||s.slug}>{(s.image||referenceCovers[s.slug])&&<img className="service-card-image" src={s.image||referenceCovers[s.slug]} alt={s.image?s.title:`${s.title} visual reference`}/>}<div className="service-icon">{icons[i%icons.length]}</div><p className="eyebrow service-kicker">{s.kicker||'Consultancy'}</p><h3>{s.title}</h3><p>{s.short_description}</p>{Number(s.starting_price)>0&&<p className="service-card-price">{s.price_label||'Starting from'} ৳{Number(s.starting_price).toLocaleString('en-BD')}</p>}<Link to={`/services/${s.slug}`}>Explore service →</Link></article>)}</div>}
+import React from 'react';
+import {Link} from 'react-router-dom';
+const symbols=['⌑','◱','✺','▤'];
+export default function ServiceCards({services=[]}){
+ return <div className="refresh-service-grid">{services.map((s,i)=><article className="refresh-service-card" key={s.slug}>
+  <Link to={`/services/${s.slug}`} className="refresh-service-img">{s.image?<img loading="lazy" src={s.image} alt={`Example imagery for ${s.title}`}/>:<div className="refresh-image-fallback">{symbols[i]}</div>}<span className="refresh-card-number">0{i+1}</span></Link>
+  <div className="refresh-service-content"><span className="refresh-label">{s.kicker||'Our expertise'}</span><h3>{s.title}</h3><p>{s.short_description}</p><Link to={`/services/${s.slug}`}>Explore service <span aria-hidden="true">↗</span></Link></div>
+  </article>)}</div>
+}

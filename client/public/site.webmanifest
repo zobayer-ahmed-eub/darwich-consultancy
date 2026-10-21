@@ -4,6 +4,6 @@
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#f47c20",
+  "theme_color": "#174f49",
   "icons": [{"src":"/brand/favicon.png","sizes":"512x512","type":"image/png"}]
 }

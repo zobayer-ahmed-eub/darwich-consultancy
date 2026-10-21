@@ -1,22 +1,27 @@
 const express=require('express');
 const db=require('../db');
+const rateLimit=require('express-rate-limit');
 const router=express.Router();
+const allowedSlugs=['cost-estimation-consultancy','architectural-interior-design','mural-painting-3d-wall-art','wood-interiors-decking'];
+const allowedCategories=['Cost Estimation & Consultancy','Architectural Interior Design','Mural Painting & 3D Wall Art','Wood Interiors & Decking'];
 
 const asSettings=rows=>Object.fromEntries(rows.map(r=>[r.setting_key,r.setting_value]));
 router.get('/settings',async(req,res)=>{const [rows]=await db.query('SELECT setting_key,setting_value FROM site_settings');res.json(asSettings(rows))});
-router.get('/services',async(req,res)=>{const [rows]=await db.query(`SELECT * FROM services WHERE active=1 AND slug IN ('cost-estimation-consultancy','architectural-interior-design','mural-painting-3d-wall-art','wood-interiors-decking') ORDER BY sort_order,id`);res.json(rows)});
-router.get('/services/:slug',async(req,res)=>{const [rows]=await db.query(`SELECT * FROM services WHERE slug=? AND active=1 AND slug IN ('cost-estimation-consultancy','architectural-interior-design','mural-painting-3d-wall-art','wood-interiors-decking') LIMIT 1`,[req.params.slug]);if(!rows.length)return res.status(404).json({message:'Service not found'});res.json(rows[0])});
+router.get('/services',async(req,res)=>{const [rows]=await db.query(`SELECT * FROM services WHERE active=1 AND slug IN (${allowedSlugs.map(()=>'?').join(',')}) ORDER BY sort_order,id`,allowedSlugs);res.json(rows)});
+router.get('/services/:slug',async(req,res)=>{if(!allowedSlugs.includes(req.params.slug))return res.status(404).json({message:'Service not found'});const [rows]=await db.query('SELECT * FROM services WHERE slug=? AND active=1 LIMIT 1',[req.params.slug]);if(!rows.length)return res.status(404).json({message:'Service not found'});res.json(rows[0])});
 router.get('/products',async(req,res)=>{const [rows]=await db.query('SELECT * FROM products WHERE active=1 ORDER BY featured DESC,sort_order,id DESC');res.json(rows)});
 router.get('/products/:slug',async(req,res)=>{const [rows]=await db.query('SELECT * FROM products WHERE slug=? AND active=1 LIMIT 1',[req.params.slug]);if(!rows.length)return res.status(404).json({message:'Package not found'});res.json(rows[0])});
-router.get('/projects',async(req,res)=>{const [rows]=await db.query('SELECT * FROM projects WHERE active=1 ORDER BY created_at DESC');res.json(rows)});
+router.get('/projects',async(req,res)=>{const [rows]=await db.query(`SELECT * FROM projects WHERE active=1 AND category IN (${allowedCategories.map(()=>'?').join(',')}) ORDER BY created_at DESC`,allowedCategories);res.json(rows)});
+router.get('/projects/:id',async(req,res)=>{const id=Number(req.params.id);if(!Number.isSafeInteger(id)||id<1)return res.status(404).json({message:'Project not found'});const [rows]=await db.query(`SELECT * FROM projects WHERE id=? AND active=1 AND category IN (${allowedCategories.map(()=>'?').join(',')}) LIMIT 1`,[id,...allowedCategories]);if(!rows.length)return res.status(404).json({message:'Project not found'});res.json(rows[0])});
 router.get('/testimonials',async(req,res)=>{const [rows]=await db.query('SELECT * FROM testimonials WHERE active=1 ORDER BY created_at DESC');res.json(rows)});
 router.get('/management',async(req,res)=>{const [rows]=await db.query('SELECT * FROM management WHERE active=1 ORDER BY sort_order,id');res.json(rows)});
-router.get('/gallery',async(req,res)=>{const [rows]=await db.query('SELECT * FROM gallery WHERE active=1 ORDER BY sort_order,id DESC');res.json(rows)});
+router.get('/gallery',async(req,res)=>{const [rows]=await db.query(`SELECT * FROM gallery WHERE active=1 AND category IN (${allowedCategories.map(()=>'?').join(',')}) ORDER BY sort_order,id DESC`,allowedCategories);res.json(rows)});
 
-router.post('/enquiries',async(req,res)=>{
-  const {name,phone,email,suburb,service,message}=req.body||{};
-  if(!name||!phone||!message)return res.status(400).json({message:'Name, phone and project details are required'});
-  await db.query('INSERT INTO enquiries(name,phone,email,suburb,service,message) VALUES (?,?,?,?,?,?)',[name,phone,email||'',suburb||'',service||'',message]);
+router.post('/enquiries',rateLimit({windowMs:15*60*1000,max:8,standardHeaders:true,legacyHeaders:false}),async(req,res)=>{
+  const {name,phone,email,suburb,service,message,company_website}=req.body||{};
+  if(company_website)return res.status(201).json({ok:true});
+  if(!name||!phone||!message||String(name).length>150||String(phone).length>80||String(message).length>6000)return res.status(400).json({message:'Valid name, phone and project details are required'});
+  await db.query('INSERT INTO enquiries(name,phone,email,suburb,service,message) VALUES (?,?,?,?,?,?)',[String(name).slice(0,150),String(phone).slice(0,80),String(email||'').slice(0,190),String(suburb||'').slice(0,120),String(service||'').slice(0,80),String(message).slice(0,6000)]);
   res.status(201).json({ok:true});
 });
 

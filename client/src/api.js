@@ -13,6 +13,7 @@ export const api = {
   products: () => fetch('/api/products').then(json),
   product: (slug) => fetch(`/api/products/${slug}`).then(json),
   projects: () => fetch('/api/projects').then(json),
+  project: (id) => fetch(`/api/projects/${encodeURIComponent(id)}`).then(json),
   testimonials: () => fetch('/api/testimonials').then(json),
   management: () => fetch('/api/management').then(json),
   gallery: () => fetch('/api/gallery').then(json),

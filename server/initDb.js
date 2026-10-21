@@ -171,7 +171,7 @@ async function initDb(){
     facebook:'',
     linkedin:'',
     instagram:'',
-    logo_url:'/brand/darwich-logo.png',
+    logo_url:'/brand/darwich-wordmark.svg',
     currency:'BDT',
     currency_symbol:'৳',
     gst_percent:'0',
@@ -190,39 +190,71 @@ async function initDb(){
     await db.query('INSERT IGNORE INTO site_settings(setting_key,setting_value) VALUES (?,?)',[k,v]);
   }
 
-  const services=[
-    ['architectural-design','Architectural Design','Planning & design','Functional, buildable architectural planning for residential and commercial projects.','We help shape the project from early concept through coordinated design. Scope can include space planning, layout development, design coordination, presentation drawings and construction-focused documentation. Every engagement is tailored to the actual site, brief and approval requirements.',0,'Starting from','project',1,1,1,1,1],
-    ['structural-engineering','Structural Engineering','Safety & buildability','Structural design and technical coordination focused on safety, efficiency and practical construction.','Our structural consultancy supports reinforced concrete, steel and mixed construction systems. We coordinate structural decisions with architecture and site conditions so the design is practical to execute and easier to manage during construction.',0,'Starting from','project',1,1,1,1,2],
-    ['cost-estimation-boq','Cost Estimation & BOQ','Cost clarity','Quantity take-offs, BOQ preparation and cost planning to help control project decisions before and during construction.','Clear cost information helps clients compare options and manage scope. We can prepare bills of quantities, preliminary estimates, itemised cost schedules and cost updates as project information develops.',0,'Starting from','project',1,1,1,1,3],
-    ['project-management','Project Management','Coordination & control','Structured project coordination covering scope, schedule, consultants, contractors and reporting.','Darwich Consultancy helps clients organise project delivery through clear responsibilities, programme tracking, coordination and practical reporting. The exact management scope is agreed around the size and stage of each project.',0,'Starting from','project',1,1,1,1,4],
-    ['construction-supervision','Construction Supervision','Site quality','Independent site supervision and construction monitoring to support quality, compliance and progress.','Site supervision can include inspections, progress observations, coordination with contractors, review of workmanship against issued drawings and identification of items requiring correction or clarification.',0,'Starting from','project',1,1,1,1,5],
-    ['interior-fitout-consultancy','Interior & Fit-out Consultancy','Spaces that work','Planning, specification and coordination support for interior upgrades, fit-outs and renovation projects.','We support interior and fit-out projects with layout planning, finish coordination, practical detailing, cost awareness and construction-stage coordination so design intent remains achievable on site.',0,'Starting from','project',1,1,1,0,6]
-  ];
-  for(const s of services){
-    await db.query(`INSERT IGNORE INTO services(slug,title,kicker,short_description,body,starting_price,price_label,price_unit,booking_enabled,quote_enabled,nav_visible,featured,sort_order) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)`,s);
+  // New public business direction. This migration runs ONCE per database.
+  // It archives, rather than permanently destroys, legacy business content.
+  const migrationKey='darwich_refresh_four_services_20261021';
+  const [[migrated]]=await db.query('SELECT setting_value FROM site_settings WHERE setting_key=?',[migrationKey]);
+  if(!migrated){
+    for(const table of ['services','projects','gallery','management','testimonials','products']){
+      const archive=`archived_20261021_${table}`;
+      await db.query(`CREATE TABLE IF NOT EXISTS \`${archive}\` LIKE \`${table}\``);
+      await db.query(`INSERT IGNORE INTO \`${archive}\` SELECT * FROM \`${table}\``);
+    }
+    // Do NOT delete orders, enquiries or existing booking records.
+    await db.query('DELETE FROM services');
+    await db.query('DELETE FROM projects');
+    await db.query('DELETE FROM gallery');
+    await db.query('DELETE FROM management');
+    await db.query('DELETE FROM testimonials');
+    await db.query('DELETE FROM products');
+    await db.query("UPDATE site_settings SET setting_value='/brand/darwich-wordmark.svg' WHERE setting_key='logo_url' AND setting_value='/brand/darwich-logo.png'");
+    console.log('Darwich refresh: legacy public catalogue archived; new categories are being seeded.');
   }
 
-  // One-time non-destructive site refresh: old services are archived, not deleted.
-  // Existing products, bookings, projects, enquiries and uploaded admin content are retained.
-  const [[migration]]=await db.query("SELECT setting_value FROM site_settings WHERE setting_key='darwich_four_services_v1'");
-  if(!migration){
-    const refreshed=[
-      ['cost-estimation-consultancy','Cost Estimation & Consultancy','Plan better · Budget clearly','Itemised project cost estimates, scope planning and practical consultancy for renovations, fit-outs and construction.','We help you define requirements, compare material options and make informed budget decisions. Available support includes quantity take-offs, BOQ preparation, estimates, material and labour costing, budget planning and indicative work schedules. Final figures depend on measured scope, site conditions and current local prices.',1],
-      ['architectural-interior-design','Architectural Interior Design','Layouts · Finishes · Practical details','Interior concepts, space planning and architectural design support for residential and commercial environments.','From concept layouts and space optimisation to coordinated finishes and materials, our architectural interior design support balances practicality, aesthetics and budget. Scope is confirmed based on project requirements and available site information.',2],
-      ['mural-painting-3d-wall-art','Mural Painting & 3D Wall Art','Schools · Cafés · Feature walls','Creative murals, cultural illustrations, commercial feature walls and 3D-inspired art for memorable spaces.','Mural work can support primary schools, cafes, public spaces and branded interiors. We discuss wall condition, design direction, artwork approval, materials and installation requirements before making a proposal.',3],
-      ['wood-interiors-decking','Wood Interiors & Decking','Resort rooms · Timber details','Warm wood interiors, wall and ceiling panelling, custom timber finishes and resort-inspired decking.','Explore timber textures, practical details, cladding, joinery and decking solutions for rooms and outdoor living spaces. The Sajek photographs shown on this website are visual references until the company verifies project attribution.',4]
-    ];
-    for(const row of refreshed){
-      await db.query(`INSERT IGNORE INTO services (slug,title,kicker,short_description,body,starting_price,booking_enabled,quote_enabled,nav_visible,featured,sort_order,active)
-        VALUES (?,?,?,?,?,0,1,1,1,1,?,1)`,row);
-    }
-    await db.query(`UPDATE services SET active=0,nav_visible=0,featured=0 WHERE slug NOT IN (?,?,?,?)`,refreshed.map(x=>x[0]));
-    // Name and role were provided by the client; photograph and credentials await confirmation.
-    const [[artist]]=await db.query('SELECT id FROM management WHERE name=? LIMIT 1',['Arifa Jahan Swarna']);
-    if(!artist) await db.query(`INSERT INTO management (name,role,bio,sort_order,active) VALUES (?,?,?,?,?)`,
-      ['Arifa Jahan Swarna','Mural Artist','Mural painting and decorative wall-art profile. Project credits, biography and an approved portrait can be added from the admin panel.',1,1]);
-    await db.query("INSERT INTO site_settings(setting_key,setting_value) VALUES ('darwich_four_services_v1','1')");
+  const services=[
+    ['cost-estimation-consultancy','Cost Estimation & Consultancy','Plan with confidence','Budget planning, clear quantity guidance and practical advice for your interior, mural or timber project.','We review the project brief, intended finishes, approximate measurements and site context to help you make informed decisions. Ask for a scope-specific estimate, advice on materials and a clear next step. Estimates are indicative until reviewed and confirmed.',1],
+    ['architectural-interior-design','Architectural Interior Design','Designed for daily life','Interior planning, material palettes and considered design concepts for residential, hospitality and commercial spaces.','We explore layout, circulation, lighting, joinery, materials and the experience of the space. Concept development can include mood boards, spatial planning and visual presentation tailored to the brief.',2],
+    ['mural-painting-3d-wall-art','Mural Painting & 3D Wall Art','Art that tells a story','School murals, custom artwork, decorative wall finishes and memorable commercial brand environments.','From cultural motifs and educational artwork to brand-focused wall painting and dimensional finishes, we work from a visual brief to create a strong sense of place. Portfolio imagery currently illustrates styles and needs project verification.',3],
+    ['wood-interiors-decking','Wood Interiors & Decking','Warmth in every detail','Wood-lined resort rooms, feature walls, built-ins and decks inspired by natural textures and thoughtful joinery.','Explore timber-inspired interior concepts including warm bedroom surfaces, statement ceilings, cabinetry and outdoor decking. The Sajek imagery shown is design reference material, not a verified completed company project.',4]
+  ];
+  for(const x of services){
+    await db.query(`INSERT IGNORE INTO services(slug,title,kicker,short_description,body,starting_price,price_label,price_unit,image,booking_enabled,quote_enabled,nav_visible,featured,sort_order,active)
+      VALUES (?,?,?,?,?,?,?,?,?,1,1,1,1,?,1)`,[
+      x[0],x[1],x[2],x[3],x[4],0,'Custom quotation','project',
+      ['/showcase/school-message.webp','/showcase/ornamental-wall.webp','/showcase/mural-painter.webp','/showcase/sajek-room.webp'][x[5]-1],x[5]
+    ]);
   }
+
+  // Seed example galleries ONLY on the first refresh, so administrators can edit/delete freely.
+  if(!migrated){
+    const projects=[
+      ['Village Primary School — Mural Inspiration','Mural Painting & 3D Wall Art','Bangladesh · design reference','REFERENCE IMAGE ONLY. Educational wall painting with illustrated school messages. Village primary school name and participation require confirmation.','/showcase/primary-school.webp'],
+      ['School Awareness Mural — Visual Reference','Mural Painting & 3D Wall Art','Bangladesh · design reference','REFERENCE IMAGE ONLY. Bold painted storytelling can support awareness campaigns and school spaces. Not a verified Darwich completion.','/showcase/school-message.webp'],
+      ['Decorative Heritage Wall Art','Mural Painting & 3D Wall Art','Design reference','REFERENCE IMAGE ONLY. Decorative hand-painted patterns and cultural motifs for interior accent walls. Project ownership unverified.','/showcase/ornamental-wall.webp'],
+      ['Commercial Brand Wall Painting Concept','Mural Painting & 3D Wall Art','Design concept','CONCEPT REFERENCE. Custom murals, logos and dimensional graphics can help cafes, offices and retail spaces tell their story. No completed Darwich project claimed.','/showcase/mural-painter.webp'],
+      ['Sajek Resort Room — Wood Interior Inspiration','Wood Interiors & Decking','Sajek Valley, Rangamati · reference','REFERENCE IMAGE ONLY. A wood-accented resort room photographed in Sajek, illustrating warm finishes and bedroom detailing. Darwich project attribution awaits confirmation.','/showcase/sajek-room.webp'],
+      ['Wood-Lined Boutique Bedroom Concept','Wood Interiors & Decking','Design reference','REFERENCE IMAGE ONLY. Wood-furnished guest bedroom, CC0 Wikimedia Commons photograph. Not a Darwich commission.','https://commons.wikimedia.org/wiki/Special:FilePath/Hotel_room_with_traditional_wooden_decor_and_city_view.jpg?width=1000']
+    ];
+    for(const p of projects)await db.query('INSERT INTO projects(title,category,suburb,description,cover_image,active) VALUES (?,?,?,?,?,1)',p);
+    const gallery=[
+      ['Primary school exterior artwork','Mural Painting & 3D Wall Art','/showcase/primary-school.webp'],
+      ['Educational mural illustration','Mural Painting & 3D Wall Art','/showcase/school-message.webp'],
+      ['Ornamental wall pattern','Mural Painting & 3D Wall Art','/showcase/ornamental-wall.webp'],
+      ['Mural painting in progress','Mural Painting & 3D Wall Art','/showcase/mural-painter.webp'],
+      ['Sajek resort bedroom inspiration','Wood Interiors & Decking','/showcase/sajek-room.webp'],
+      ['Wood decor bedroom inspiration · CC0','Wood Interiors & Decking','https://commons.wikimedia.org/wiki/Special:FilePath/Hotel_room_with_traditional_wooden_decor_and_city_view.jpg?width=1000'],
+      ['Hospitality bedroom example · CC0','Wood Interiors & Decking','https://commons.wikimedia.org/wiki/Special:FilePath/Bed_in_hotel_room.jpg?width=1000']
+    ];
+    for(let i=0;i<gallery.length;i++)await db.query('INSERT INTO gallery(title,category,image,sort_order,active) VALUES (?,?,?,?,1)',[...gallery[i],i+1]);
+    await db.query('INSERT INTO management(name,role,bio,phone,email,photo,sort_order,active) VALUES (?,?,?,?,?,?,?,1)',[
+      'Arifa Jahan Swarna','Mural Artist','Mural and decorative wall-art profile. Portrait and portfolio credit require final client confirmation.','','','/showcase/arifa-portrait-reference.webp',1
+    ]);
+    for(let i=2;i<=4;i++)await db.query('INSERT INTO management(name,role,bio,phone,email,photo,sort_order,active) VALUES (?,?,?,?,?,?,?,1)',[
+      `Team member ${String(i).padStart(2,'0')} — details pending`,'Profile awaiting confirmation','Replace this placeholder with the approved name, photograph and role in the Admin → Management section.','','','',i
+    ]);
+    await db.query('INSERT INTO site_settings(setting_key,setting_value) VALUES (?,?)',[migrationKey,'1']);
+  }
+
   const email=process.env.ADMIN_EMAIL;
   const password=process.env.ADMIN_PASSWORD;
   if(email && password){

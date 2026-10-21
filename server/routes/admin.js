@@ -4,6 +4,8 @@ const jwt=require('jsonwebtoken');
 const db=require('../db');
 const auth=require('../middleware/auth');
 const router=express.Router();
+const approvedServices=new Set(['cost-estimation-consultancy','architectural-interior-design','mural-painting-3d-wall-art','wood-interiors-decking']);
+const approvedCategories=new Set(['Cost Estimation & Consultancy','Architectural Interior Design','Mural Painting & 3D Wall Art','Wood Interiors & Decking']);
 
 const cleanSlug=value=>String(value||'').toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
 const n=value=>Number.isFinite(Number(value))?Number(value):0;
@@ -23,7 +25,7 @@ router.get('/services',async(req,res)=>{
 router.post('/services',async(req,res)=>{
   const b=req.body||{};
   const slug=cleanSlug(b.slug||b.title);
-  if(!b.title||!slug)return res.status(400).json({message:'Service title and URL slug are required'});
+  if(!b.title||!slug||!approvedServices.has(slug))return res.status(400).json({message:'Only the four approved service slugs are allowed'});
   try{
     const [result]=await db.query(`INSERT INTO services(
       slug,title,kicker,short_description,body,starting_price,price_label,price_unit,image,
@@ -43,7 +45,7 @@ router.post('/services',async(req,res)=>{
 router.put('/services/:id',async(req,res)=>{
   const b=req.body||{};
   const slug=cleanSlug(b.slug||b.title);
-  if(!b.title||!slug)return res.status(400).json({message:'Service title and URL slug are required'});
+  if(!b.title||!slug||!approvedServices.has(slug))return res.status(400).json({message:'Only the four approved service slugs are allowed'});
   try{
     await db.query(`UPDATE services SET
       slug=?,title=?,kicker=?,short_description=?,body=?,starting_price=?,price_label=?,price_unit=?,image=?,
@@ -83,12 +85,12 @@ router.put('/management/:id',async(req,res)=>{const b=req.body||{};await db.quer
 router.delete('/management/:id',async(req,res)=>{await db.query('DELETE FROM management WHERE id=?',[req.params.id]);res.json({ok:true})});
 
 router.get('/gallery',async(req,res)=>{const [rows]=await db.query('SELECT * FROM gallery ORDER BY sort_order,id DESC');res.json(rows)});
-router.post('/gallery',async(req,res)=>{const b=req.body||{};if(!b.title||!b.image)return res.status(400).json({message:'Title and image are required'});await db.query('INSERT INTO gallery(title,category,image,sort_order,active) VALUES (?,?,?,?,?)',[b.title,b.category||'',b.image,Number(b.sort_order)||0,b.active??1]);res.status(201).json({ok:true})});
+router.post('/gallery',async(req,res)=>{const b=req.body||{};if(!b.title||!b.image||!approvedCategories.has(b.category))return res.status(400).json({message:'Title, image and an approved category are required'});await db.query('INSERT INTO gallery(title,category,image,sort_order,active) VALUES (?,?,?,?,?)',[b.title,b.category||'',b.image,Number(b.sort_order)||0,b.active??1]);res.status(201).json({ok:true})});
 router.put('/gallery/:id',async(req,res)=>{const b=req.body||{};await db.query('UPDATE gallery SET title=?,category=?,image=?,sort_order=?,active=? WHERE id=?',[b.title,b.category||'',b.image||'',Number(b.sort_order)||0,b.active??1,req.params.id]);res.json({ok:true})});
 router.delete('/gallery/:id',async(req,res)=>{await db.query('DELETE FROM gallery WHERE id=?',[req.params.id]);res.json({ok:true})});
 
 router.get('/projects',async(req,res)=>{const [rows]=await db.query('SELECT * FROM projects ORDER BY created_at DESC');res.json(rows)});
-router.post('/projects',async(req,res)=>{const b=req.body||{};if(!b.title)return res.status(400).json({message:'Project title is required'});await db.query('INSERT INTO projects(title,category,suburb,description,cover_image,active) VALUES (?,?,?,?,?,?)',[b.title,b.category||'',b.suburb||'',b.description||'',b.cover_image||'',b.active??1]);res.status(201).json({ok:true})});
+router.post('/projects',async(req,res)=>{const b=req.body||{};if(!b.title||!approvedCategories.has(b.category))return res.status(400).json({message:'Project title and an approved category are required'});await db.query('INSERT INTO projects(title,category,suburb,description,cover_image,active) VALUES (?,?,?,?,?,?)',[b.title,b.category||'',b.suburb||'',b.description||'',b.cover_image||'',b.active??1]);res.status(201).json({ok:true})});
 router.put('/projects/:id',async(req,res)=>{const b=req.body||{};await db.query('UPDATE projects SET title=?,category=?,suburb=?,description=?,cover_image=?,active=? WHERE id=?',[b.title,b.category||'',b.suburb||'',b.description||'',b.cover_image||'',b.active??1,req.params.id]);res.json({ok:true})});
 router.delete('/projects/:id',async(req,res)=>{await db.query('DELETE FROM projects WHERE id=?',[req.params.id]);res.json({ok:true})});
 
