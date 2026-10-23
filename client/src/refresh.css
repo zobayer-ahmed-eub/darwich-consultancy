@@ -89,3 +89,16 @@
 .refresh-samples-grid img{background:#e5eae6;object-fit:cover}
 @media(max-width:950px){.refresh-home-artwork-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:550px){.refresh-home-artwork-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.refresh-home-artwork-tile img{height:170px}.refresh-home-artwork-tile span{font-size:12px;padding:10px}.refresh-home-artwork-tile small{font-size:10px}}
+
+/* Real photo collections — architecture and timber interiors */
+.refresh-new-interior-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:17px}
+.refresh-new-interior-tile{position:relative;display:block;overflow:hidden;min-height:285px;border-radius:19px;background:#e6e2dc;color:#fff;box-shadow:0 9px 32px rgba(0,0,0,.075)}
+.refresh-new-interior-tile img{width:100%;height:100%;position:absolute;inset:0;object-fit:cover;transition:transform .3s ease}
+.refresh-new-interior-tile:hover img{transform:scale(1.06)}
+.refresh-new-interior-tile::after{content:"";position:absolute;inset:36% 0 0;background:linear-gradient(transparent,rgba(10,22,20,.75))}
+.refresh-new-interior-tile span{position:absolute;bottom:0;left:0;right:0;padding:25px 18px 19px;z-index:1}
+.refresh-new-interior-tile small{display:block;font-size:10px;font-weight:750;letter-spacing:.12em;margin-bottom:7px}
+.refresh-new-interior-tile strong{display:block;font-size:20px;line-height:1.2}
+@media(max-width:1040px){.refresh-new-interior-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.refresh-new-interior-grid{grid-template-columns:1fr}.refresh-new-interior-tile{min-height:240px}}
+@media(prefers-reduced-motion:reduce){.refresh-new-interior-tile img{transition:none}}

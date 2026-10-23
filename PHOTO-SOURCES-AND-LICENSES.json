@@ -1,0 +1,68 @@
+[
+  {
+    "slug": "interior-minimal-wood",
+    "category": "Architectural Interior Design",
+    "title": "Modern Living Space",
+    "description": "Neutral furniture, natural textures and architectural detail.",
+    "id": 34959436,
+    "page": "https://www.pexels.com/photo/modern-minimalist-living-room-interior-design-34959436/",
+    "photographer": "Pavel Morillo",
+    "url": "https://images.pexels.com/photos/34959436/pexels-photo-34959436.jpeg?auto=compress&cs=tinysrgb&w=1800&h=1200&fit=crop",
+    "local": "/stock/interior-minimal-wood.jpg"
+  },
+  {
+    "slug": "interior-warm-contemporary",
+    "category": "Architectural Interior Design",
+    "title": "Contemporary Living Interior",
+    "description": "Layered materials, comfortable seating and practical spatial planning.",
+    "id": 19899076,
+    "page": "https://www.pexels.com/photo/modern-interior-design-of-living-room-19899076/",
+    "photographer": "Lisa Anna",
+    "url": "https://images.pexels.com/photos/19899076/pexels-photo-19899076.jpeg?auto=compress&cs=tinysrgb&w=1800&h=1200&fit=crop",
+    "local": "/stock/interior-warm-contemporary.jpg"
+  },
+  {
+    "slug": "interior-feature-wall",
+    "category": "Architectural Interior Design",
+    "title": "Warm Wood Accent Living Room",
+    "description": "Natural wood tones paired with modern residential finishes.",
+    "id": 34538315,
+    "page": "https://www.pexels.com/photo/modern-luxurious-living-room-interior-design-34538315/",
+    "photographer": "HONG SON",
+    "url": "https://images.pexels.com/photos/34538315/pexels-photo-34538315.jpeg?auto=compress&cs=tinysrgb&w=1800&h=1200&fit=crop",
+    "local": "/stock/interior-feature-wall.jpg"
+  },
+  {
+    "slug": "wood-a-frame-bedroom",
+    "category": "Wood Interiors & Decking",
+    "title": "A-Frame Timber Bedroom",
+    "description": "Timber cladding, warm light and compact hospitality-room inspiration.",
+    "id": 34944270,
+    "page": "https://www.pexels.com/photo/cozy-a-frame-cabin-bedroom-with-wooden-interior-34944270/",
+    "photographer": "John Moshi",
+    "url": "https://images.pexels.com/photos/34944270/pexels-photo-34944270.jpeg?auto=compress&cs=tinysrgb&w=1800&h=1200&fit=crop",
+    "local": "/stock/wood-a-frame-bedroom.jpg"
+  },
+  {
+    "slug": "wood-cabin-retreat",
+    "category": "Wood Interiors & Decking",
+    "title": "Wooden Cabin Living Interior",
+    "description": "Natural timber structure, joinery and hospitality-inspired finishes.",
+    "id": 19737867,
+    "page": "https://www.pexels.com/photo/furniture-in-wooden-cottage-19737867/",
+    "photographer": "Jonathan Borba",
+    "url": "https://images.pexels.com/photos/19737867/pexels-photo-19737867.jpeg?auto=compress&cs=tinysrgb&w=1800&h=1200&fit=crop",
+    "local": "/stock/wood-cabin-retreat.jpg"
+  },
+  {
+    "slug": "wood-panelled-room",
+    "category": "Wood Interiors & Decking",
+    "title": "Wood-Panelled Bedroom Detail",
+    "description": "Warm timber wall finishes and soft accent lighting for restful spaces.",
+    "id": 9056676,
+    "page": "https://www.pexels.com/photo/a-wooden-wall-inside-the-bedroom-9056676/",
+    "photographer": "Matheus Bertelli",
+    "url": "https://images.pexels.com/photos/9056676/pexels-photo-9056676.jpeg?auto=compress&cs=tinysrgb&w=1800&h=1200&fit=crop",
+    "local": "/stock/wood-panelled-room.jpg"
+  }
+]

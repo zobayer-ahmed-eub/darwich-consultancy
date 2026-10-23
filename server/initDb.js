@@ -265,6 +265,35 @@ async function initDb(){
     await db.query('INSERT INTO site_settings(setting_key,setting_value) VALUES (?,?)',[migrationKey,'1']);
   }
 
+  // Free-photography interiors: additive, one-time, does not remove saved work or enquiries.
+  // Images are externally sourced, not attributed as completed company projects.
+  const interiorMigrationKey='darwich_real_interiors_pexels_20261023';
+  const [[interiorsDone]]=await db.query('SELECT setting_value FROM site_settings WHERE setting_key=?',[interiorMigrationKey]);
+  if(!interiorsDone){
+    const items=[{"slug": "interior-minimal-wood", "category": "Architectural Interior Design", "title": "Modern Living Space", "description": "Neutral furniture, natural textures and architectural detail.", "url": "https://images.pexels.com/photos/34959436/pexels-photo-34959436.jpeg?auto=compress&cs=tinysrgb&w=1800&h=1200&fit=crop"}, {"slug": "interior-warm-contemporary", "category": "Architectural Interior Design", "title": "Contemporary Living Interior", "description": "Layered materials, comfortable seating and practical spatial planning.", "url": "/stock/interior-warm-contemporary.jpg"}, {"slug": "interior-feature-wall", "category": "Architectural Interior Design", "title": "Warm Wood Accent Living Room", "description": "Natural wood tones paired with modern residential finishes.", "url": "/stock/interior-feature-wall.jpg"}, {"slug": "wood-a-frame-bedroom", "category": "Wood Interiors & Decking", "title": "A-Frame Timber Bedroom", "description": "Timber cladding, warm light and compact hospitality-room inspiration.", "url": "/stock/wood-a-frame-bedroom.jpg"}, {"slug": "wood-cabin-retreat", "category": "Wood Interiors & Decking", "title": "Wooden Cabin Living Interior", "description": "Natural timber structure, joinery and hospitality-inspired finishes.", "url": "/stock/wood-cabin-retreat.jpg"}, {"slug": "wood-panelled-room", "category": "Wood Interiors & Decking", "title": "Wood-Panelled Bedroom Detail", "description": "Warm timber wall finishes and soft accent lighting for restful spaces.", "url": "/stock/wood-panelled-room.jpg"}];
+    for(const item of items){
+      await db.query('INSERT INTO projects(title,category,suburb,description,cover_image,gallery_images,active) VALUES (?,?,?,?,?,?,1)',[
+        item.title,item.category,'',item.description,item.url,JSON.stringify([item.url])]);
+      await db.query('INSERT INTO gallery(title,category,image,sort_order,active) VALUES (?,?,?,?,1)',[
+        item.title,item.category,item.url,item.category==='Architectural Interior Design'?60:70]);
+    }
+    // Only replace unchanged starter images. Admin-customized service images are untouched.
+    const firstInterior=items.find(x=>x.slug==='interior-minimal-wood').url;
+    const firstWood=items.find(x=>x.slug==='wood-a-frame-bedroom').url;
+    await db.query('UPDATE services SET image=? WHERE slug=? AND (image IS NULL OR image IN (?,?))',
+      [firstInterior,'architectural-interior-design','/showcase/ornamental-wall.webp','']);
+    await db.query('UPDATE services SET image=? WHERE slug=? AND (image IS NULL OR image IN (?,?))',
+      [firstWood,'wood-interiors-decking','/showcase/sajek-room.webp','']);
+    // Retire only the unchanged starter stock references, not staff-added projects.
+    await db.query('UPDATE projects SET active=0 WHERE title=? AND cover_image=?',[
+      'Wood-Lined Boutique Bedroom Concept',
+      'https://commons.wikimedia.org/wiki/Special:FilePath/Hotel_room_with_traditional_wooden_decor_and_city_view.jpg?width=1000']);
+    await db.query('UPDATE gallery SET active=0 WHERE category=? AND image LIKE ? AND title LIKE ?',
+      ['Wood Interiors & Decking','https://commons.wikimedia.org/%','%CC0%']);
+    await db.query('INSERT INTO site_settings(setting_key,setting_value) VALUES (?,?)',[interiorMigrationKey,'1']);
+    console.log('Darwich: interior and timber photo collections added.');
+  }
+
   // Service Real Demo photo portfolio: non-destructive, repeatable only once per database.
   // Does not touch enquiries/bookings/products/management or remove any user-made projects.
   const photosMigration='darwich_real_demo_artwork_20261023';
