@@ -10,7 +10,7 @@ export default function Layout(){
  return <div className="refresh-site"><a className="refresh-skip" href="#main">Skip to main content</a>
   <div className="refresh-info-bar"><div className="container"><span>Thoughtful spaces, original details &amp; practical consultancy</span><span>{settings.service_area||'Bangladesh'}</span></div></div>
   <header className="site-header refresh-header"><div className="container nav-wrap">
-   <Link to="/" className="brand" onClick={close}><img src="/brand/darwich-symbol.svg" alt="Darwich monogram"/><span className="refresh-brand-title">DARWICH<small>CONSULTANCY</small></span></Link>
+   <Link to="/" className="brand" onClick={close}><img className="darwich-site-logo" src={settings.logo_url || "/brand/darwich-wordmark.svg"} alt="Darwich Consultancy" onError={e=>{if(e.currentTarget.dataset.fallback)return;e.currentTarget.dataset.fallback="1";e.currentTarget.src="/brand/darwich-wordmark.svg";}} /></Link>
    <button className="menu-btn" onClick={()=>setOpen(!open)} aria-controls="darwich-nav" aria-expanded={open} aria-label={open?'Close menu':'Open menu'}>{open?'×':'☰'}</button>
    <nav id="darwich-nav" className={open?'nav open':'nav'} aria-label="Main navigation">
     <NavLink to="/" end onClick={close}>Home</NavLink>
