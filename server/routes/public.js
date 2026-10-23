@@ -6,7 +6,7 @@ const allowedSlugs=['cost-estimation-consultancy','architectural-interior-design
 const allowedCategories=['Cost Estimation & Consultancy','Architectural Interior Design','Mural Painting & 3D Wall Art','Wood Interiors & Decking'];
 
 const asSettings=rows=>Object.fromEntries(rows.map(r=>[r.setting_key,r.setting_value]));
-router.get('/settings',async(req,res)=>{const [rows]=await db.query('SELECT setting_key,setting_value FROM site_settings');res.json(asSettings(rows))});
+router.get('/settings',async(req,res)=>{res.set('Cache-Control','private, no-store, max-age=0');const [rows]=await db.query('SELECT setting_key,setting_value FROM site_settings');res.json(asSettings(rows))});
 router.get('/services',async(req,res)=>{const [rows]=await db.query(`SELECT * FROM services WHERE active=1 AND slug IN (${allowedSlugs.map(()=>'?').join(',')}) ORDER BY sort_order,id`,allowedSlugs);res.json(rows)});
 router.get('/services/:slug',async(req,res)=>{if(!allowedSlugs.includes(req.params.slug))return res.status(404).json({message:'Service not found'});const [rows]=await db.query('SELECT * FROM services WHERE slug=? AND active=1 LIMIT 1',[req.params.slug]);if(!rows.length)return res.status(404).json({message:'Service not found'});res.json(rows[0])});
 router.get('/products',async(req,res)=>{const [rows]=await db.query('SELECT * FROM products WHERE active=1 ORDER BY featured DESC,sort_order,id DESC');res.json(rows)});

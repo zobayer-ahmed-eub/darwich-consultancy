@@ -15,7 +15,25 @@ router.post('/login',async(req,res)=>{const {email,password}=req.body||{};const 
 router.use(auth);
 router.get('/summary',async(req,res)=>{const names=['services','products','bookings','projects','testimonials','enquiries','management','gallery'];const out={};for(const n of names){const [[r]]=await db.query(`SELECT COUNT(*) count FROM \`${n}\``);out[n]=Number(r.count||0)}const [[newBookings]]=await db.query("SELECT COUNT(*) count FROM bookings WHERE status='new'");const [[newEnquiries]]=await db.query("SELECT COUNT(*) count FROM enquiries WHERE status='new'");out.new_bookings=Number(newBookings.count||0);out.new_enquiries=Number(newEnquiries.count||0);res.json(out)});
 router.get('/settings',async(req,res)=>{const [rows]=await db.query('SELECT setting_key,setting_value FROM site_settings');res.json(Object.fromEntries(rows.map(r=>[r.setting_key,r.setting_value])))});
-router.put('/settings',async(req,res)=>{for(const [k,v] of Object.entries(req.body||{})){await db.query('INSERT INTO site_settings(setting_key,setting_value) VALUES (?,?) ON DUPLICATE KEY UPDATE setting_value=VALUES(setting_value)',[k,String(v??'')]);}res.json({ok:true})});
+// Limit homepage image settings to safe image sources and keep uploads compact.
+const homepageImages=new Set(['home_hero_main_image','home_hero_secondary_image','home_sajek_image']);
+const homepageFlags=new Set(['home_hero_art_visible','home_hero_main_visible','home_hero_secondary_visible','home_sajek_visible']);
+router.put('/settings',async(req,res)=>{
+ const entries=Object.entries(req.body||{});
+ for(const [key,value] of entries){
+  if(homepageImages.has(key)){
+   const src=String(value??'').trim();
+   const isData=/^data:image\/(?:jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(src);
+   const isURL=/^https:\/\/[^\s"'<>]+$/i.test(src)||/^\/(?!\/)[\w./%-]+$/.test(src);
+   if(src && !(isData||isURL))return res.status(400).json({message:'Homepage images must be JPG, PNG, WebP uploads, HTTPS URLs, or local paths.'});
+   if(src.length>650000)return res.status(413).json({message:'Image is too large after compression. Please use a smaller image.'});
+  }
+  if(homepageFlags.has(key)&&!['0','1'].includes(String(value)))return res.status(400).json({message:'Invalid visibility setting.'});
+  if(key==='home_hero_background_color'&&value!==''&&!/^#[0-9a-f]{6}$/i.test(String(value)))return res.status(400).json({message:'Invalid background colour.'});
+ }
+ for(const [k,v] of entries){await db.query('INSERT INTO site_settings(setting_key,setting_value) VALUES (?,?) ON DUPLICATE KEY UPDATE setting_value=VALUES(setting_value)',[k,String(v??'')]);}
+ res.json({ok:true});
+});
 
 router.get('/services',async(req,res)=>{
   const [rows]=await db.query('SELECT * FROM services ORDER BY sort_order,id');
