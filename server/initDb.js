@@ -138,6 +138,8 @@ async function initDb(){
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`);
 
+  await ensureColumn('projects','gallery_images','LONGTEXT NULL');
+
   await db.query(`CREATE TABLE IF NOT EXISTS testimonials (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(150) NOT NULL,
@@ -261,6 +263,70 @@ async function initDb(){
       `Team member ${String(i).padStart(2,'0')} — details pending`,'Profile awaiting confirmation','Replace this placeholder with the approved name, photograph and role in the Admin → Management section.','','','',i
     ]);
     await db.query('INSERT INTO site_settings(setting_key,setting_value) VALUES (?,?)',[migrationKey,'1']);
+  }
+
+  // Service Real Demo photo portfolio: non-destructive, repeatable only once per database.
+  // Does not touch enquiries/bookings/products/management or remove any user-made projects.
+  const photosMigration='darwich_real_demo_artwork_20261023';
+  const [[photosApplied]]=await db.query('SELECT setting_value FROM site_settings WHERE setting_key=?',[photosMigration]);
+  if(!photosApplied){
+    const category='Mural Painting & 3D Wall Art';
+    const prefix='/portfolio/';
+    // Hide only the four unchanged, earlier reference cards — retain rows for recovery.
+    const formerProjects=[
+      ['Village Primary School — Mural Inspiration','/showcase/primary-school.webp'],
+      ['School Awareness Mural — Visual Reference','/showcase/school-message.webp'],
+      ['Decorative Heritage Wall Art','/showcase/ornamental-wall.webp'],
+      ['Commercial Brand Wall Painting Concept','/showcase/mural-painter.webp']
+    ];
+    for(const [title,cover] of formerProjects){
+      await db.query('UPDATE projects SET active=0 WHERE title=? AND cover_image=? AND category=? AND (description LIKE ? OR description LIKE ?)',
+        [title,cover,category,'REFERENCE IMAGE ONLY.%','CONCEPT REFERENCE.%']);
+    }
+    const formerGallery=[
+      ['Primary school exterior artwork','/showcase/primary-school.webp'],
+      ['Educational mural illustration','/showcase/school-message.webp'],
+      ['Ornamental wall pattern','/showcase/ornamental-wall.webp'],
+      ['Mural painting in progress','/showcase/mural-painter.webp']
+    ];
+    for(const [title,image] of formerGallery)await db.query('UPDATE gallery SET active=0 WHERE title=? AND image=? AND category=?',[title,image,category]);
+    const projects=[
+      {title:'Decorative Feature Wall & Interior Mural',cover:'decorative-feature-wall.webp',images:['decorative-feature-wall.webp','hand-painted-artwork.webp'],desc:'PORTFOLIO PHOTO PROVIDED. Colourful hand-painted feature-wall imagery supplied for the Darwich artwork portfolio. Location, client and artist attribution require confirmation.'},
+      {title:'Shahid Minar Alpona Art',cover:'shahid-minar-alpona-wide.webp',images:['shahid-minar-alpona-wide.webp','shahid-minar-alpona-detail.webp'],desc:'PORTFOLIO PHOTO PROVIDED. Two photographs of a public-space Alpona installation. Specific event, location and project credit await verification.'},
+      {title:'Heritage & Community Wall Art',cover:'heritage-wall-art.webp',images:['heritage-wall-art.webp','july-revolution-wall-art.webp'],desc:'PORTFOLIO PHOTO PROVIDED. Heritage-inspired and community-themed illustrated wall art, shared for the gallery. Project credits have not yet been confirmed.'},
+      {title:'3D-Inspired & Contemporary Street Murals',cover:'colorful-street-wall-art.webp',images:['colorful-street-wall-art.webp','3d-themed-wall-art.webp','wings-of-fire-wall-art.webp'],desc:'PORTFOLIO PHOTO PROVIDED. Characterful street-mural and themed artwork photography. Project names and ownership to be confirmed.'},
+      {title:'Exhibition & Hand-Painted Artworks',cover:'art-exhibition.webp',images:['art-exhibition.webp','cardboard-painting.webp','hand-painted-artwork.webp'],desc:'PORTFOLIO PHOTO PROVIDED. An exhibition display and creative painting process samples. Exhibition name and participants require approval before publication.'},
+      {title:'Awareness & Educational Wall Art',cover:'awareness-wall-art.webp',images:['awareness-wall-art.webp','july-revolution-wall-art.webp'],desc:'PORTFOLIO PHOTO PROVIDED. Public-awareness and educational art examples. No school or campaign ownership is claimed without supporting details.'}
+    ];
+    for(const p of projects){
+      const cover=prefix+p.cover;const photos=JSON.stringify(p.images.map(image=>prefix+image));
+      const [existing]=await db.query('SELECT id FROM projects WHERE title=? AND cover_image=? LIMIT 1',[p.title,cover]);
+      if(!existing.length)await db.query('INSERT INTO projects(title,category,suburb,description,cover_image,gallery_images,active) VALUES (?,?,?,?,?,?,1)',[p.title,category,'Portfolio photos · details to confirm',p.desc,cover,photos]);
+    }
+    const gallery=[
+      ['Decorative feature wall','decorative-feature-wall.webp'],
+      ['Shahid Minar Alpona — wide view','shahid-minar-alpona-wide.webp'],
+      ['Shahid Minar Alpona — close-up','shahid-minar-alpona-detail.webp'],
+      ['Colourful street wall painting','colorful-street-wall-art.webp'],
+      ['Wings of Fire feature artwork','wings-of-fire-wall-art.webp'],
+      ['Heritage-inspired mural','heritage-wall-art.webp'],
+      ['3D and themed wall painting','3d-themed-wall-art.webp'],
+      ['July Revolution-themed illustration','july-revolution-wall-art.webp'],
+      ['Exhibition artwork','art-exhibition.webp'],
+      ['Awareness-themed art','awareness-wall-art.webp'],
+      ['Cardboard painting demonstration','cardboard-painting.webp'],
+      ['Hand-painted canvas artwork','hand-painted-artwork.webp']
+    ];
+    for(let i=0;i<gallery.length;i++){
+      const [title,file]=gallery[i],image=prefix+file;
+      const [existing]=await db.query('SELECT id FROM gallery WHERE image=? AND category=? LIMIT 1',[image,category]);
+      if(!existing.length)await db.query('INSERT INTO gallery(title,category,image,sort_order,active) VALUES (?,?,?,?,1)',[title,category,image,20+i]);
+    }
+    // Update default references only, never overwrite custom admin-selected images.
+    await db.query('UPDATE services SET image=? WHERE slug=? AND image=?',[prefix+'decorative-feature-wall.webp','mural-painting-3d-wall-art','/showcase/mural-painter.webp']);
+    await db.query('UPDATE site_settings SET setting_value=? WHERE setting_key=? AND setting_value=?',[prefix+'decorative-feature-wall.webp','home_hero_main_image','/showcase/ornamental-wall.webp']);
+    await db.query('INSERT INTO site_settings(setting_key,setting_value) VALUES (?,?)',[photosMigration,'1']);
+    console.log(`Darwich photo portfolio: added ${projects.length} project groups and ${gallery.length} artwork photos; prior sample cards hidden, not deleted.`);
   }
 
   const email=process.env.ADMIN_EMAIL;

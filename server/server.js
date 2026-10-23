@@ -49,7 +49,7 @@ async function pageData(pathname){
   if(/^\/projects\/\d+$/.test(pathname)){
     const id=Number(pathname.split('/')[2]);
     try {const [rows]=await db.query('SELECT id,title,category,description,cover_image FROM projects WHERE id=? AND active=1 AND category IN (?,?,?,?) LIMIT 1',[id,'Cost Estimation & Consultancy','Architectural Interior Design','Mural Painting & 3D Wall Art','Wood Interiors & Decking']);
-      if(rows.length){const p=rows[0];return {title:`${p.title} | Visual Reference | Darwich Consultancy`,description:(p.description||'Darwich design inspiration and reference project. Not presented as completed company work.').slice(0,155),image:absolute(p.cover_image),project:p}}}
+      if(rows.length){const p=rows[0];const supplied=String(p.cover_image||'').startsWith('/portfolio/');return {title:`${p.title} | ${supplied?'Artwork Gallery':'Visual Reference'} | Darwich Consultancy`,description:(p.description||'Darwich mural and creative interiors portfolio photography.').replace(/^(PORTFOLIO PHOTO PROVIDED\.|REFERENCE IMAGE ONLY\.)\s*/, '').slice(0,155),image:absolute(p.cover_image),project:p}}}
     catch{}
     return {title:'Portfolio entry not found | Darwich Consultancy',description:'',noindex:true};
   }
@@ -68,7 +68,7 @@ function schemaFor(pathname,settings,meta){
   if(pathname==='/about')schemas.push({'@context':'https://schema.org','@type':'AboutPage',url:`${SITE_URL}/about`,name:'About Darwich Consultancy'});
   if(pathname==='/contact')schemas.push({'@context':'https://schema.org','@type':'ContactPage',url:`${SITE_URL}/contact`,name:'Contact Darwich Consultancy'});
   if(pathname==='/team')schemas.push({'@context':'https://schema.org','@type':'CollectionPage',url:`${SITE_URL}/team`,name:'Darwich Consultancy Management Team'});
-  if(meta.project)schemas.push({'@context':'https://schema.org','@type':'CreativeWork','name':meta.project.title,'description':meta.project.description||'Illustrative design reference; not verified company work','image':absolute(meta.project.cover_image),'url':`${SITE_URL}${pathname}`});
+  if(meta.project)schemas.push({'@context':'https://schema.org','@type':'CreativeWork','name':meta.project.title,'description':meta.project.description||'Submitted artwork photography and design references; credits pending confirmation','image':absolute(meta.project.cover_image),'url':`${SITE_URL}${pathname}`});
   return schemas;
 }
 
