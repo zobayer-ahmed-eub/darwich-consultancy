@@ -29,6 +29,8 @@ router.put('/settings',async(req,res)=>{
    if(src.length>650000)return res.status(413).json({message:'Image is too large after compression. Please use a smaller image.'});
   }
   if(homepageFlags.has(key)&&!['0','1'].includes(String(value)))return res.status(400).json({message:'Invalid visibility setting.'});
+  if(key==='office_map_url' && value && !/^https:\/\/(?:www\.google\.com\/maps\/|maps\.app\.goo\.gl\/)/i.test(String(value))) return res.status(400).json({message:'Use a Google Maps sharing URL for office directions.'});
+  if(key==='office_map_embed_url' && value && !/^https:\/\/www\.google\.com\/maps\/embed\?/i.test(String(value))) return res.status(400).json({message:'Use a Google Maps Embed URL beginning with https://www.google.com/maps/embed?.'});
   if(key==='home_hero_background_color'&&value!==''&&!/^#[0-9a-f]{6}$/i.test(String(value)))return res.status(400).json({message:'Invalid background colour.'});
  }
  for(const [k,v] of entries){await db.query('INSERT INTO site_settings(setting_key,setting_value) VALUES (?,?) ON DUPLICATE KEY UPDATE setting_value=VALUES(setting_value)',[k,String(v??'')]);}

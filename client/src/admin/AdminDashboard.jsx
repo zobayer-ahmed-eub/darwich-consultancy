@@ -49,6 +49,21 @@ function Overview({summary}){const cards=[['Services',summary.services],['Packag
 
 function Settings({data,onSaved}){const [f,setF]=useState(data||{});useEffect(()=>setF(data||{}),[data]);const set=(k,v)=>setF(x=>({...x,[k]:v}));const save=async()=>{try{await api.adminJson('settings','PUT',f,token());await onSaved();alert('Settings saved. Open the public homepage in a new tab to see your changes.')}catch(error){alert(error.message||'Unable to save settings')}};return <>
 <section className="admin-card"><h2>Business settings</h2><div className="admin-form-grid">{[['business_name','Business name'],['phone','Phone'],['email','Email'],['service_area','Service area'],['trade_licence','Trade licence'],['registration','Registration / accreditation'],['address','Office address'],['facebook','Facebook URL'],['linkedin','LinkedIn URL'],['instagram','Instagram URL']].map(([k,l])=><label key={k}>{l}<input value={f[k]||''} onChange={e=>set(k,e.target.value)}/></label>)}<div className="admin-logo-setting"><label className="admin-logo-setting-title">Website logo (header and admin)</label><div className="admin-logo-preview-shell"><img className="admin-logo-preview" src={f.logo_url || '/brand/darwich-wordmark.svg'} alt="Preview of selected website logo" onError={e=>{if(e.currentTarget.dataset.fallback)return;e.currentTarget.dataset.fallback='1';e.currentTarget.src='/brand/darwich-wordmark.svg'}}/></div><ImgInput label="Upload image or paste an image URL" value={f.logo_url} onChange={v=>set('logo_url',v)}/><button type="button" className="admin-reset-logo" onClick={()=>set('logo_url','/brand/darwich-wordmark.svg')}>Restore default logo</button><p className="admin-help">Save all settings below to apply. PNG, JPEG, SVG (URL), or WebP recommended; use a landscape image with a transparent background. For uploads, prefer files under 500 KB for speed.</p></div></div></section>
+<section className="admin-card">
+  <h2>Office photo and Google Maps</h2>
+  <p className="admin-help">The Contact page shows the office photo and a map. Enter the real office street address under Business settings above; the map searches for that address automatically. Your existing team photos and phone numbers stay in Admin → Management.</p>
+  <div className="admin-form-grid">
+    <div className="wide"><ImgInput label="Office photo" value={f.office_photo || '/office/darwich-office.webp'} onChange={v=>set('office_photo',v)}/></div>
+    <label className="wide">Google Maps directions / share link (optional)
+      <input placeholder="https://maps.app.goo.gl/..." value={f.office_map_url||''} onChange={e=>set('office_map_url',e.target.value)}/>
+      <small>Paste your exact office pin link. Visitors use this for Get directions.</small>
+    </label>
+    <label className="wide">Google Maps embed URL (optional)
+      <input placeholder="https://www.google.com/maps/embed?pb=..." value={f.office_map_embed_url||''} onChange={e=>set('office_map_embed_url',e.target.value)}/>
+      <small>Google Maps → Share → Embed a map → copy the URL from the iframe src. If blank, the map uses your office address.</small>
+    </label>
+  </div>
+</section>
 <section className="admin-card admin-homepage-settings"><h2>Homepage images &amp; background</h2>
 <p className="admin-help">Change these pictures here — no VS Code or GitHub push is needed after this update is deployed. Click <b>Save all settings</b> below to publish your choices. Uploaded images are compressed and saved with your business settings, so future code deployments won't replace them.</p>
 <div className="admin-home-global"><Toggle label="Show the homepage hero image collage" value={f.home_hero_art_visible??'1'} onChange={v=>set('home_hero_art_visible',String(v))}/><label>Hero background colour <input type="color" value={/^#[0-9a-f]{6}$/i.test(f.home_hero_background_color||'')?f.home_hero_background_color:'#f3f5f0'} onChange={e=>set('home_hero_background_color',e.target.value)}/></label><button type="button" className="admin-home-reset-colour" onClick={()=>set('home_hero_background_color','')}>Use original gradient</button></div>

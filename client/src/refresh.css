@@ -102,3 +102,35 @@
 @media(max-width:1040px){.refresh-new-interior-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:600px){.refresh-new-interior-grid{grid-template-columns:1fr}.refresh-new-interior-tile{min-height:240px}}
 @media(prefers-reduced-motion:reduce){.refresh-new-interior-tile img{transition:none}}
+
+/* Team contact data is sourced from existing admin-managed profiles. */
+.refresh-team-grid{align-items:stretch}
+.refresh-team-card.refresh-team-card-centered{display:flex;flex-direction:column;align-items:center;min-width:0;text-align:center;padding:28px 18px 26px;border-radius:16px;box-shadow:0 8px 28px rgba(23,67,52,.05)}
+.refresh-team-card-centered .refresh-team-image{width:112px;height:112px;flex:0 0 112px;aspect-ratio:1!important;border-radius:50%;overflow:hidden;margin:0 auto;background:#e2eee7;border:3px solid #f8faf7;box-shadow:0 0 0 1px #d8e4db,0 7px 22px rgba(14,67,53,.1)}
+.refresh-team-card-centered .refresh-team-image img{width:100%;height:100%;object-fit:cover;object-position:center 22%;border-radius:50%}
+.refresh-team-card-centered .refresh-avatar-placeholder{width:100%;height:100%;border-radius:50%;display:grid;place-content:center}
+.refresh-team-card-centered .refresh-avatar-placeholder span{font-size:34px}
+.refresh-team-card-centered .refresh-team-details{padding:0!important;width:100%;min-width:0;display:flex;flex-direction:column;align-items:center}
+.refresh-team-card-centered h3{font-size:20px;line-height:1.25;margin:18px 0 6px;overflow-wrap:anywhere}
+.refresh-team-card-centered .refresh-team-role{color:#318276;font-size:12px;line-height:1.6;font-weight:750;margin:0}
+.refresh-team-card-centered .refresh-team-bio{font-size:13px;color:#60736b;font-weight:400;line-height:1.6;margin:12px 0 0;white-space:pre-line}
+.refresh-team-card-centered .refresh-team-contacts{display:flex;flex-direction:column;gap:7px;align-items:center;margin-top:14px;max-width:100%}
+.refresh-team-card-centered .refresh-team-contacts:empty{display:none}
+.refresh-team-card-centered .refresh-team-phone,.refresh-team-card-centered .refresh-team-email{display:inline-flex;align-items:center;justify-content:center;gap:6px;color:#1c6255;font-size:13px;font-weight:700;line-height:1.4;overflow-wrap:anywhere;word-break:break-word;text-align:center}
+.refresh-team-card-centered .refresh-team-phone:hover,.refresh-team-card-centered .refresh-team-email:hover{text-decoration:underline}
+/* Public office photo, address and Google Maps (admin settings supply location). */
+.refresh-office-section{background:#f6f9f6}
+.refresh-office-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:stretch}
+.refresh-office-photo{margin:0;position:relative;min-height:380px;overflow:hidden;border-radius:18px;background:#e9ede9}
+.refresh-office-photo img{width:100%;height:100%;position:absolute;inset:0;object-fit:cover;object-position:center}
+.refresh-office-photo figcaption{position:absolute;bottom:14px;left:14px;background:rgba(10,48,40,.86);color:#fff;border-radius:8px;padding:9px 15px;font-size:12px;font-weight:700}
+.refresh-office-location{display:flex;flex-direction:column;min-width:0;border:1px solid #e1e9e1;border-radius:18px;background:white;overflow:hidden}
+.refresh-office-details{padding:24px 25px;display:flex;flex-direction:column;gap:8px}
+.refresh-office-details h3{font-size:25px;color:#25483e;margin:0 0 6px}
+.refresh-office-details p{margin:0;color:#586e62;overflow-wrap:anywhere}
+.refresh-office-directions,.refresh-office-contact{color:#21695c;font-weight:750;width:fit-content}
+.refresh-office-directions:hover,.refresh-office-contact:hover{text-decoration:underline}
+.refresh-office-location iframe{border:0;width:100%;height:250px;flex:1 0 250px}
+.refresh-office-map-empty{min-height:210px;display:grid;place-content:center;background:#edf2ed;color:#5b7166;font-size:14px;padding:30px;text-align:center}
+@media(max-width:760px){.refresh-office-grid{grid-template-columns:1fr}.refresh-office-photo{min-height:280px}.refresh-team-card.refresh-team-card-centered{padding:22px 9px}.refresh-team-card-centered .refresh-team-image{width:92px;height:92px;flex-basis:92px}.refresh-team-card-centered h3{font-size:17px}.refresh-team-card-centered .refresh-team-phone{font-size:12px}}
+@media(max-width:440px){.refresh-team-card-centered .refresh-team-image{width:78px;height:78px;flex-basis:78px}.refresh-team-card-centered h3{font-size:16px}}

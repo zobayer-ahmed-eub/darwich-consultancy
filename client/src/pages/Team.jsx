@@ -1,2 +1,26 @@
-import React,{useEffect,useState} from 'react';import Seo from '../components/Seo';import {api} from '../api';
-export default function Team(){const [team,setTeam]=useState([]);useEffect(()=>{api.management().then(setTeam).catch(()=>{})},[]);return <><Seo title="Creative & Management Team | Darwich Consultancy" description="Meet Darwich Consultancy's creative and management people, including mural artist Arifa Jahan Swarna." canonical="https://darwichconsultancy.com/team"/><section className="refresh-page-head"><div className="container narrow"><p className="eyebrow">PEOPLE & PERSPECTIVES</p><h1>The people behind<br/><em>the possibilities.</em></h1><p className="lead">The team profiles below are editable from the existing Darwich admin panel. Remaining approved photos and details can be added when supplied.</p></div></section><section className="section refresh-section"><div className="container"><div className="refresh-team-grid">{team.map((m,i)=><article key={m.id} className="refresh-team-card"><div className="refresh-team-image">{m.photo?<img src={m.photo} alt={`${m.name} — profile portrait for confirmation`}/>:<div className="refresh-avatar-placeholder"><span>0{i+1}</span><small>Photo pending</small></div>}</div><h3>{m.name}</h3><p>{m.role}</p><small>{m.bio}</small></article>)}</div></div></section></>}
+import React,{useEffect,useState} from 'react';
+import Seo from '../components/Seo';
+import {api} from '../api';
+import TeamCard from '../components/TeamCard';
+
+export default function Team(){
+  const [team,setTeam]=useState([]);
+  useEffect(()=>{api.management().then(setTeam).catch(()=>{})},[]);
+  return <>
+    <Seo title="Creative & Management Team | Darwich Consultancy" description="Meet the people behind Darwich Consultancy." canonical="https://darwichconsultancy.com/team"/>
+    <section className="refresh-page-head">
+      <div className="container narrow">
+        <p className="eyebrow">OUR PEOPLE</p>
+        <h1>The people behind<br/><em>the possibilities.</em></h1>
+        <p className="lead">Meet our team and get in touch directly.</p>
+      </div>
+    </section>
+    <section className="section refresh-section">
+      <div className="container">
+        <div className="refresh-team-grid">
+          {team.map((person,index)=><TeamCard key={person.id} person={person} index={index} showBio />)}
+        </div>
+      </div>
+    </section>
+  </>;
+}
