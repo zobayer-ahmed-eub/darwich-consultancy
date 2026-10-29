@@ -134,3 +134,13 @@
 .refresh-office-map-empty{min-height:210px;display:grid;place-content:center;background:#edf2ed;color:#5b7166;font-size:14px;padding:30px;text-align:center}
 @media(max-width:760px){.refresh-office-grid{grid-template-columns:1fr}.refresh-office-photo{min-height:280px}.refresh-team-card.refresh-team-card-centered{padding:22px 9px}.refresh-team-card-centered .refresh-team-image{width:92px;height:92px;flex-basis:92px}.refresh-team-card-centered h3{font-size:17px}.refresh-team-card-centered .refresh-team-phone{font-size:12px}}
 @media(max-width:440px){.refresh-team-card-centered .refresh-team-image{width:78px;height:78px;flex-basis:78px}.refresh-team-card-centered h3{font-size:16px}}
+
+/* Google Maps location inside the existing footer's right-side columns. */
+.refresh-footer-right{min-width:0}
+.refresh-footer-map{margin-top:25px;border:1px solid #315a50;border-radius:11px;overflow:hidden;background:#123b34}
+.refresh-footer-map-heading{padding:12px 15px;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px}
+.refresh-footer-map-heading span{font-weight:800;letter-spacing:.04em;color:#e8f4ea;font-size:12px;margin:0}
+.refresh-footer .refresh-footer-map-heading a{font-size:12px;font-weight:700;color:#a7dac7;margin:0;text-decoration:underline;text-underline-offset:3px}
+.refresh-footer .refresh-footer-map-heading a:hover,.refresh-footer .refresh-footer-map-heading a:focus-visible{color:#fff}
+.refresh-footer-map iframe{display:block;width:100%;height:207px;border:0;background:#e2e8df}
+@media (max-width:700px){.refresh-footer-map{margin-top:26px}.refresh-footer-map iframe{height:225px}}
